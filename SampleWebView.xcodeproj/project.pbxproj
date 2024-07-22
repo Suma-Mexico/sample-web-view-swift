@@ -11,6 +11,7 @@
 		F7E39BFE2C40F59E00001086 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F7E39BFD2C40F59E00001086 /* ContentView.swift */; };
 		F7E39C002C40F5D300001086 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = F7E39BFF2C40F5D300001086 /* Assets.xcassets */; };
 		F7E39C032C40F5D300001086 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = F7E39C022C40F5D300001086 /* Preview Assets.xcassets */; };
+		F7E39C0C2C40F64000001086 /* WebView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F7E39C0B2C40F63F00001086 /* WebView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -20,6 +21,7 @@
 		F7E39BFF2C40F5D300001086 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		F7E39C022C40F5D300001086 /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
 		F7E39C042C40F5D300001086 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		F7E39C0B2C40F63F00001086 /* WebView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -54,6 +56,7 @@
 			children = (
 				F7E39BFB2C40F59E00001086 /* SampleWebViewApp.swift */,
 				F7E39BFD2C40F59E00001086 /* ContentView.swift */,
+				F7E39C0B2C40F63F00001086 /* WebView.swift */,
 				F7E39BFF2C40F5D300001086 /* Assets.xcassets */,
 				F7E39C042C40F5D300001086 /* Info.plist */,
 				F7E39C012C40F5D300001086 /* Preview Content */,
@@ -138,6 +141,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				F7E39C0C2C40F64000001086 /* WebView.swift in Sources */,
 				F7E39BFE2C40F59E00001086 /* ContentView.swift in Sources */,
 				F7E39BFC2C40F59E00001086 /* SampleWebViewApp.swift in Sources */,
 			);
