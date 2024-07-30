@@ -5,9 +5,27 @@
 //  Created by wastecross on 7/11/24.
 //
 
+import AVFoundation
 import Foundation
 import SwiftUI
 import WebKit
+
+func checkCameraPermission(completion: @escaping (Bool) -> Void) {
+    switch AVCaptureDevice.authorizationStatus(for: .video) {
+    case .authorized:
+        completion(true)
+    case .notDetermined:
+        AVCaptureDevice.requestAccess(for: .video) { granted in
+            DispatchQueue.main.async {
+                completion(granted)
+            }
+        }
+    case .denied, .restricted:
+        completion(false)
+    @unknown default:
+        completion(false)
+    }
+}
 
 func getUrlSdk(completion: @escaping (Result<String, Error>) -> Void) {
     // URL obtenida de
@@ -80,6 +98,8 @@ struct WebView: UIViewRepresentable {
         let webView = WKWebView(frame: .zero, configuration: config)
         let url = URL(string: urlSdk)
 
+        webView.uiDelegate = self
+        webView.navigationDelegate = self
         webView.load(URLRequest(url: url!))
         
         return webView
