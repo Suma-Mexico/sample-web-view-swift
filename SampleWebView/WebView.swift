@@ -5,11 +5,13 @@
 //  Created by wastecross on 7/11/24.
 //
 
-import AVFoundation
+// import AVFoundation
 import Foundation
 import SwiftUI
 import WebKit
 
+/**
+TO DO: validate permissions
 func checkCameraPermission(completion: @escaping (Bool) -> Void) {
     switch AVCaptureDevice.authorizationStatus(for: .video) {
     case .authorized:
@@ -26,6 +28,7 @@ func checkCameraPermission(completion: @escaping (Bool) -> Void) {
         completion(false)
     }
 }
+*/
 
 func getUrlSdk(completion: @escaping (Result<String, Error>) -> Void) {
     // URL obtenida de
