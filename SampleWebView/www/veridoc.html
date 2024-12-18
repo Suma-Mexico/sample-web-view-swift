@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" type="text/css" href="./assets/css/main.css" />
+    <title>Document Autocapture JS</title>
+  </head>
+  <body>
+    <!--Contenedor donde se mostrará el componente de autocaptura-->
+    <div>
+      <div id="autocapture_documents"></div>
+    </div>
+ 
+  </body>
+  <!-- Script que escucha el evento "message" -->
+  <script type="module">
+      const contentButtons = document.getElementById("content_buttons");
+    // Cuando se recibe un mensaje del componente de autocaptura...
+    window.addEventListener("message", function (event) {
+      // Se extraen las propiedades "image" y "error" del mensaje
+      let image = event.data.image;
+      let error = event.data.error;
+
+      // Si se recibió una imagen, se muestra un console log con la imagen resultante
+      if (image) {
+          
+          console.log(image);
+          
+          sessionStorage.setItem("imageCapture", JSON.stringify(image));
+      }
+      
+      // Si se recibió un error, se muestra un console log con el nombre y mensaje del error
+      if (error) {
+        const getError = { name: error.name, message: error.message };
+        console.log(getError);
+      }
+      
+    });
+  </script>
+</html>
