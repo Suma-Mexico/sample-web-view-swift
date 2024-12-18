@@ -76,6 +76,57 @@ func getUrlSdk(completion: @escaping (Result<String, Error>) -> Void) {
 }
 
 struct WebView: UIViewRepresentable {
+
+    // -------------------------------------- Código del cliente
+    var wkWebView: WKWebView!
+    var bundle: Bundle {
+        return Bundle.main
+    }
+
+    var scriptString: String {
+        if let path = bundle.path(forResource: "autocapture.min", ofType: "js") {
+            do {
+                return try String(contentsOfFile: path)
+            } catch  {
+                return ""
+            }
+        } else {
+            return ""
+        }
+    }
+
+    func wkWebViewSetup() {
+        let config = WKWebViewConfiguration()
+        let js = scriptString
+        let script = WKUserScript(source: js, injectionTime: .atDocumentEnd, forMainFrameOnly: false)
+        config.userContentController.addUserScript(script)
+        config.userContentController.add(self, name: "message")
+
+        let sourceLogHandler = "function captureLog(msg) { window.webkit.messageHandlers.longHandler.postMessage(msg); } window.console.log = captureLog;"
+        let scriptLogHandler = WKUserScript(source: sourceLogHandler, injectionTime: .atDocumentEnd, forMainFrameOnly: false)
+        config.userContentController.addUserScript(scriptLogHandler)
+        config.userContentController.add(self, name: "longHandler")
+
+        config.allowsPictureInPictureMediaPlayback = true
+        config.mediaTypesRequiringUserActionForPlayback = .all
+        config.allowsInlineMediaPlayback = true
+        config.preferences.setValue(true, forKey: "allowFileAccessFromFileURLs")
+        config.setValue(true, forKey: "allowUniversalAccessFromFileURLs")
+
+        wkWebView.backgroundColor = .black
+        wkWebView = WKWebView(frame: view.bounds, configuration: config)
+    }
+
+    func loadHTML() {
+        let nameHTML = "veridoc"
+        if let pathHTML = bundle.path(forResource: nameHTML, ofType: "html") {
+            let url = URL(fileURLWithPath: pathHTML)
+            wkWebView.loadFileURL(url, allowingReadAccessTo: url)
+        }
+    }
+
+    // -------------------------------------- Código del cliente
+
     func makeUIView(context: Context) -> some UIView {
         // Iniciar variable donde se declarara la url para comenzar el proceso de captura
         var urlSdk = ""
