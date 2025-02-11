@@ -9,8 +9,8 @@ import SwiftUI
 
 struct ContentView: View {
     var body: some View {
-        VStack {
-            WebView()
+        NavigationView {
+            WebView().edgesIgnoringSafeArea(.all)
         }
     }
 }

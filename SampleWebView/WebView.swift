@@ -1,119 +1,83 @@
-//
-//  WebView.swift
-//  SampleWebView
-//
-//  Created by wastecross on 7/11/24.
-//
-
-// import AVFoundation
-import Foundation
 import SwiftUI
 import WebKit
 
-/**
-TO DO: validate permissions
-func checkCameraPermission(completion: @escaping (Bool) -> Void) {
-    switch AVCaptureDevice.authorizationStatus(for: .video) {
-    case .authorized:
-        completion(true)
-    case .notDetermined:
-        AVCaptureDevice.requestAccess(for: .video) { granted in
-            DispatchQueue.main.async {
-                completion(granted)
-            }
-        }
-    case .denied, .restricted:
-        completion(false)
-    @unknown default:
-        completion(false)
-    }
-}
-*/
-
-func getUrlSdk(completion: @escaping (Result<String, Error>) -> Void) {
-    // URL obtenida de
+struct WebView: UIViewControllerRepresentable {
     
-    // URL para obtener la url donde se subiran los archivos
-    let postURL = URL(string: "https://veridocid.azure-api.net/api/id/v3/urlSdk")!
-
-    // Crear el body del request, onlyCapture indica que solo se tomaran las fotos
-    // y se regresaran en un post message.
-    let parameters: [String: Bool] = [
-        "onlyCapture": true,
-    ]
-
-    // Convertir el body a JSON data
-    let jsonData = try! JSONSerialization.data(withJSONObject: parameters, options: [])
-
-    // Crear el request
-    var request = URLRequest(url: postURL)
-    request.httpMethod = "POST"
-    request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-    request.setValue("sk_test_FqUVwaeqFm8YrC8i9WUgOKl5PsGuR0+qrZ7YLVz3/l8=", forHTTPHeaderField: "x-api-key")
-    request.httpBody = jsonData
-
-    // Crear la tarea de URLSession
-    let task = URLSession.shared.dataTask(with: request) { data, response, error in
-        guard let data = data, error == nil else {
-            print("Error: \(error?.localizedDescription ?? "No data")")
-            return
-        }
+    func makeUIViewController(context: Context) -> UIViewController {
+        let viewController = UIViewController()
         
-        // Manejar la respuesta del servidor
-        if let httpResponse = response as? HTTPURLResponse {
-            print("Status code: \(httpResponse.statusCode)")
-        }
+        // Configuración de la WebView
+        let webConfiguration = WKWebViewConfiguration()
         
-        // Convertir la respuesta a texto
-        if let responseString = String(data: data, encoding: .utf8) {
-            completion(.success(responseString))
-        } else {
-            completion(.failure(NSError(domain: "", code: -1, userInfo: [NSLocalizedDescriptionKey: "Unable to parse response"])))
-        }
+        // iOS 14+: Usar WKWebpagePreferences.allowsContentJavaScript en lugar de javaScriptEnabled
+        let preferences = WKWebpagePreferences()
+        preferences.allowsContentJavaScript = true
+        webConfiguration.defaultWebpagePreferences = preferences
+        
+        // Permitir comunicación entre el HTML y Swift
+        let contentController = WKUserContentController()
+        contentController.add(context.coordinator, name: "callbackHandler")
+        webConfiguration.userContentController = contentController
+        
+        let webView = WKWebView(frame: .zero, configuration: webConfiguration)
+        
+        // Cargar el HTML
+        let htmlString = """
+        <!DOCTYPE html>
+        <html lang="en">
+          <head>
+            <meta charset="UTF-8" />
+            <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+            <title>Document Autocapture JS</title>
+            <script type="module" crossorigin src="./assets/js/autocapture.min.js"></script>
+          </head>
+          <body>
+            <div>
+              <div id="autocapture_documents"></div>
+            </div>
+            <script type="module">
+              window.addEventListener("message", function (event) {
+                let image = event.data.image;
+                let error = event.data.error;
+
+                if (image) {
+                  console.log(image);
+                  window.webkit.messageHandlers.callbackHandler.postMessage(image);
+                }
+
+                if (error) {
+                  const getError = { name: error.name, message: error.message };
+                  console.log(getError);
+                  window.webkit.messageHandlers.callbackHandler.postMessage(JSON.stringify(getError));
+                }
+              });
+            </script>
+          </body>
+        </html>
+        """
+
+        webView.loadHTMLString(htmlString, baseURL: nil)
+        
+        viewController.view = webView
+        return viewController
     }
-    // Ejecutar tarea
-    task.resume()
-}
-
-struct WebView: UIViewRepresentable {
+    
+    func updateUIViewController(_ uiViewController: UIViewController, context: Context) {
+        // No es necesario actualizar nada en este caso
+    }
+    
+    // Configurar el Coordinador para manejar mensajes de JS
     func makeCoordinator() -> Coordinator {
-        return Coordinator()
+        Coordinator()
     }
-
-    func makeUIView(context: Context) -> WKWebView {
-        var urlSdk = ""
-
-        getUrlSdk() { result in
-            switch result {
-                case .success(let responseText):
-                    print("Response: \(responseText)")
-                    urlSdk = responseText
-                case .failure(let error):
-                    print("Error: \(error.localizedDescription)")
+    
+    class Coordinator: NSObject, WKScriptMessageHandler {
+        func userContentController(_ userContentController: WKUserContentController, didReceive message: WKScriptMessage) {
+            if message.name == "callbackHandler" {
+                if let messageBody = message.body as? String {
+                    print("Mensaje recibido desde JS: \(messageBody)")
+                }
             }
         }
-
-        let prefs = WKPreferences()
-        let pagePrefs = WKWebpagePreferences()
-        pagePrefs.allowsContentJavaScript = true
-
-        let config = WKWebViewConfiguration()
-        config.preferences = prefs
-        config.defaultWebpagePreferences = pagePrefs
-
-        let webView = WKWebView(frame: .zero, configuration: config)
-        webView.uiDelegate = context.coordinator
-        webView.navigationDelegate = context.coordinator
-
-        if let url = URL(string: urlSdk) {
-            webView.load(URLRequest(url: url))
-        }
-        
-        return webView
     }
-
-    func updateUIView(_ uiView: WKWebView, context: Context) {}
-
-    class Coordinator: NSObject, WKUIDelegate, WKNavigationDelegate {}
 }
-
