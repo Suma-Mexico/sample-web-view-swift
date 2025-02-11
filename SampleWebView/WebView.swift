@@ -76,10 +76,13 @@ func getUrlSdk(completion: @escaping (Result<String, Error>) -> Void) {
 }
 
 struct WebView: UIViewRepresentable {
-    func makeUIView(context: Context) -> some UIView {
-        // Iniciar variable donde se declarara la url para comenzar el proceso de captura
+    func makeCoordinator() -> Coordinator {
+        return Coordinator()
+    }
+
+    func makeUIView(context: Context) -> WKWebView {
         var urlSdk = ""
-        
+
         getUrlSdk() { result in
             switch result {
                 case .success(let responseText):
@@ -89,7 +92,7 @@ struct WebView: UIViewRepresentable {
                     print("Error: \(error.localizedDescription)")
             }
         }
-        
+
         let prefs = WKPreferences()
         let pagePrefs = WKWebpagePreferences()
         pagePrefs.allowsContentJavaScript = true
@@ -99,15 +102,18 @@ struct WebView: UIViewRepresentable {
         config.defaultWebpagePreferences = pagePrefs
 
         let webView = WKWebView(frame: .zero, configuration: config)
-        let url = URL(string: urlSdk)
+        webView.uiDelegate = context.coordinator
+        webView.navigationDelegate = context.coordinator
 
-        webView.uiDelegate = self
-        webView.navigationDelegate = self
-        webView.load(URLRequest(url: url!))
+        if let url = URL(string: urlSdk) {
+            webView.load(URLRequest(url: url))
+        }
         
         return webView
     }
-    
-    func updateUIView(_ uiView: UIViewType, context: Context) {}
+
+    func updateUIView(_ uiView: WKWebView, context: Context) {}
+
+    class Coordinator: NSObject, WKUIDelegate, WKNavigationDelegate {}
 }
 
