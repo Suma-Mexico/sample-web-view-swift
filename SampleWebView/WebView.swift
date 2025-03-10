@@ -19,6 +19,17 @@ struct WebView: UIViewControllerRepresentable {
         contentController.add(context.coordinator, name: "callbackHandler")
         webConfiguration.userContentController = contentController
         
+        // **Aquí se inyecta el archivo JS**
+        if let path = Bundle.main.path(forResource: "autocapture", ofType: "min.js", inDirectory: "assets/js") {
+            do {
+                let jsString = try String(contentsOfFile: path, encoding: .utf8)
+                let script = WKUserScript(source: jsString, injectionTime: .atDocumentEnd, forMainFrameOnly: true)
+                webConfiguration.userContentController.addUserScript(script)
+            } catch {
+                print("Error cargando el archivo JS: \(error)")
+            }
+        }
+        
         let webView = WKWebView(frame: .zero, configuration: webConfiguration)
         
         // Cargar el HTML
@@ -29,10 +40,10 @@ struct WebView: UIViewControllerRepresentable {
             <meta charset="UTF-8" />
             <meta name="viewport" content="width=device-width, initial-scale=1.0" />
             <title>Document Autocapture JS</title>
-            <script type="module" crossorigin src="./assets/js/autocapture.min.js"></script>
           </head>
           <body>
             <div>
+              <p>Prueba SUMA JS</p>
               <div id="autocapture_documents"></div>
             </div>
             <script type="module">
