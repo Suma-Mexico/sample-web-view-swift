@@ -43,7 +43,6 @@ struct WebView: UIViewControllerRepresentable {
           </head>
           <body>
             <div>
-              <p>Prueba SUMA JS</p>
               <div id="autocapture_documents"></div>
             </div>
             <script type="module">
